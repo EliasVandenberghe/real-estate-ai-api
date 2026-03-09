@@ -9,6 +9,7 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import FunctionTransformer
 
 # Dataset laden
 df = pd.read_csv("sold_properties_mock_realistic_6000.csv")
@@ -48,7 +49,7 @@ numeric = [
 # Preprocessing
 preprocessor = ColumnTransformer([
     ("cat", OneHotEncoder(handle_unknown="ignore"), categorical),
-    ("num", "passthrough", numeric)
+    ("num", FunctionTransformer(), numeric)
 ])
 
 # Model pipeline
