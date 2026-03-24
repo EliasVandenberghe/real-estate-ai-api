@@ -1,8 +1,10 @@
 fastapi
 uvicorn
-pandas
+pandas==2.2.2
 numpy
 scikit-learn
 statsmodels
 torch
+dask==2024.2.1
+utilsforecast==0.1.12
 timesfm
