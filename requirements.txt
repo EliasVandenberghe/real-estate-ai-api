@@ -1,10 +1,9 @@
 fastapi
 uvicorn
-pandas==2.2.2
+pandas
 numpy
 scikit-learn
-statsmodels
+joblib
 torch
-dask==2024.2.1
-utilsforecast==0.1.12
-timesfm
+transformers
+accelerate
