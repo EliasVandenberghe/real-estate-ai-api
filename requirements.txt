@@ -1,7 +1,10 @@
---index-url https://pypi.org/simple
---extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.2.0+cpu
-torchvision==0.17.0+cpu
-transformers==4.38.0
+fastapi
+uvicorn
 pandas
 numpy
+scikit-learn
+joblib
+torch
+transformers==4.57.6
+accelerate
+git+https://github.com/amazon-science/chronos-forecasting.git
