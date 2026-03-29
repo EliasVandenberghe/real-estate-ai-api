@@ -44,28 +44,4 @@ def predict_price(property_data):
         "range_low": float(round(lower_bound, 2)),
         "range_high": float(round(upper_bound, 2))
     }
-
-# --------------------------------------------------
-# Local test
-# --------------------------------------------------
-
-if __name__ == "__main__":
-
-    test_property = {
-        "surface_area": 140,
-        "bedrooms": 3,
-        "bathrooms": 1,
-        "build_year": 1998,
-        "epc_score": 220,
-        "garden_area": 120,
-        "garage": True,
-        "pool": False,
-        "property_type": "house",
-        "city": "Antwerp"
-    }
-
-    result = predict_price(test_property)
-
-    print("\nProperty Valuation Test\n")
-    print(result)
 # %%

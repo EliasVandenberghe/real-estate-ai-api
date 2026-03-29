@@ -164,22 +164,3 @@ def generate_price_trend(property_input):
         ]
 
     }
-
-
-# --------------------------------------------------
-# Local test (for development)
-# --------------------------------------------------
-
-if __name__ == "__main__":
-
-    test_property = {
-        "city": "Antwerp",
-        "property_type": "house",
-        "surface_area": 140
-    }
-
-    result = generate_price_trend(test_property)
-
-    print("\nPrice Trend Forecast Test\n")
-    print(result)
-# %%
