@@ -1,10 +1,10 @@
 fastapi
 uvicorn
-pandas==2.2.2
+pandas
 numpy
 scikit-learn
-statsmodels
+joblib
 torch
-dask==2024.2.1
-utilsforecast==0.1.12
-timesfm
+transformers==4.57.6
+accelerate
+git+https://github.com/amazon-science/chronos-forecasting.git
