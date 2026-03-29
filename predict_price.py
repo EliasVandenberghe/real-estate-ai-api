@@ -39,9 +39,33 @@ def predict_price(property_data):
 
     # Resultaat teruggeven (voor API response)
     return {
-        "estimated_value": round(prediction, 2),
-        "confidence_score": round(confidence, 1),
-        "range_low": round(lower_bound, 2),
-        "range_high": round(upper_bound, 2)
+        "estimated_value": float(round(prediction, 2)),
+        "confidence_score": float(round(confidence, 1)),
+        "range_low": float(round(lower_bound, 2)),
+        "range_high": float(round(upper_bound, 2))
     }
+
+# --------------------------------------------------
+# Local test
+# --------------------------------------------------
+
+if __name__ == "__main__":
+
+    test_property = {
+        "surface_area": 140,
+        "bedrooms": 3,
+        "bathrooms": 1,
+        "build_year": 1998,
+        "epc_score": 220,
+        "garden_area": 120,
+        "garage": True,
+        "pool": False,
+        "property_type": "house",
+        "city": "Antwerp"
+    }
+
+    result = predict_price(test_property)
+
+    print("\nProperty Valuation Test\n")
+    print(result)
 # %%
