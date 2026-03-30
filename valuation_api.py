@@ -3,35 +3,47 @@ import os
 import uvicorn
 import joblib
 import pandas as pd
-from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from price_trend import generate_price_trend
 
-# Global variabele voor de pipeline
-chronos_pipeline = None
+app = FastAPI()
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # DIT GEBEURT DIRECT BIJ HET OPSTARTEN
-    global chronos_pipeline
-    print("Systeem start op: Chronos wordt nu geladen...")
-    from price_trend import generate_price_trend # Importeer de logica
-    # Hier laden we het model alvast in het geheugen
-    # (Je kunt hier eventueel een dummy-voorspelling doen om het model te 'warmen')
-    print("Chronos is succesvol ingeladen!")
-    yield
-    # Hier kun je eventueel dingen afsluiten bij shutdown
-    print("Systeem sluit af...")
-
-app = FastAPI(lifespan=lifespan)
-
-# Rest van je code (valuation_model.pkl laden etc.)
-data = joblib.load("valuation_model.pkl")
-model = data["model"]
-rmse = data["rmse"]
+# Laad het lineaire model direct (is erg licht)
+try:
+    data = joblib.load("valuation_model.pkl")
+    valuation_model = data["model"]
+    rmse = data["rmse"]
+    print("Succesvol valuation_model.pkl geladen.")
+except Exception as e:
+    print(f"Fout bij laden model: {e}")
 
 @app.get("/")
 def health_check():
-    return {"status": "online", "message": "Real Estate API is running"}
+    return {"status": "online", "message": "Real Estate API is running", "environment": "production"}
 
-# Je endpoints blijven hetzelfde...
+@app.post("/predict-all")
+def predict_all(property_data: dict):
+    """Combineert prijs en trend in één keer voor de frontend"""
+    try:
+        # 1. Prijs voorspellen
+        df = pd.DataFrame([property_data])
+        prediction = float(valuation_model.predict(df)[0])
+        confidence = max(0, 100 - (rmse / prediction) * 100)
+
+        # 2. Trend voorspellen (roept lazy loading van Chronos aan)
+        trend_data = generate_price_trend(property_data)
+
+        return {
+            "valuation": {
+                "estimated_value": int(prediction),
+                "confidence_score": round(confidence, 1)
+            },
+            "trend": trend_data
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
 # %%
