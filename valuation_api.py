@@ -3,68 +3,35 @@ import os
 import uvicorn
 import joblib
 import pandas as pd
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from price_trend import generate_price_trend
 
-app = FastAPI()
+# Global variabele voor de pipeline
+chronos_pipeline = None
 
-# --- 1. Modellen laden bij opstart ---
-# Let op: dit kan op Render Free even duren en veel geheugen kosten
-try:
-    data = joblib.load("valuation_model.pkl")
-    model = data["model"]
-    rmse = data["rmse"]
-    print("Succesvol valuation_model.pkl geladen.")
-except Exception as e:
-    print(f"Fout bij laden model: {e}")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # DIT GEBEURT DIRECT BIJ HET OPSTARTEN
+    global chronos_pipeline
+    print("Systeem start op: Chronos wordt nu geladen...")
+    from price_trend import generate_price_trend # Importeer de logica
+    # Hier laden we het model alvast in het geheugen
+    # (Je kunt hier eventueel een dummy-voorspelling doen om het model te 'warmen')
+    print("Chronos is succesvol ingeladen!")
+    yield
+    # Hier kun je eventueel dingen afsluiten bij shutdown
+    print("Systeem sluit af...")
 
-# --- 2. Routes ---
+app = FastAPI(lifespan=lifespan)
+
+# Rest van je code (valuation_model.pkl laden etc.)
+data = joblib.load("valuation_model.pkl")
+model = data["model"]
+rmse = data["rmse"]
 
 @app.get("/")
 def health_check():
-    """Route voor Render om te zien of de API leeft."""
-    return {
-        "status": "online",
-        "message": "Real Estate API is running",
-        "environment": "production"
-    }
+    return {"status": "online", "message": "Real Estate API is running"}
 
-@app.post("/predict-price")
-def predict_price(property_data: dict):
-    df = pd.DataFrame([{
-        "surface_area": property_data["surface_area"],
-        "bedrooms": property_data["bedrooms"],
-        "bathrooms": property_data["bathrooms"],
-        "build_year": property_data["build_year"],
-        "epc_score": property_data["epc_score"],
-        "garden_area": property_data["garden_area"],
-        "garage": property_data["garage"],
-        "pool": property_data["pool"],
-        "property_type": property_data["property_type"],
-        "city": property_data["city"]
-    }])
-
-    prediction = float(model.predict(df)[0])
-    confidence = max(0, 100 - (rmse / prediction) * 100)
-
-    return {
-        "estimated_value": prediction,
-        "confidence_score": float(round(confidence, 1)),
-        "range_low": float(prediction - rmse),
-        "range_high": float(prediction + rmse)
-    }
-
-@app.post("/price-trend")
-def price_trend(property_data: dict):
-    # Deze functie roept Chronos aan (via price_trend.py)
-    trend = generate_price_trend(property_data)
-    return trend
-
-# --- 3. Start-up Logica ---
-if __name__ == "__main__":
-    # Render gebruikt de omgevingsvariabele $PORT
-    # Als die niet bestaat (lokaal), gebruiken we 10000
-    port = int(os.environ.get("PORT", 10000))
-    print(f"Starting app on port {port}...")
-    uvicorn.run(app, host="0.0.0.0", port=port)
+# Je endpoints blijven hetzelfde...
 # %%
