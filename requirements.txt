@@ -1,11 +1,15 @@
 fastapi
-uvicorn
+uvicorn[standard]
+
 pandas==2.1.4
 numpy<2.0.0
 scikit-learn
 joblib
+
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.2.1
+torch==2.2.1+cpu
+
 transformers>=4.41.0
 accelerate>=0.34.0
+
 git+https://github.com/amazon-science/chronos-forecasting.git
